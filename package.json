@@ -1,0 +1,18 @@
+{
+    "name": "aico",
+    "description": "abort in co-routines",
+    "version": "0.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/jest": "^25.1.4",
+        "eslint": "^6.8.0",
+        "eslint-config-byungi": "^0.10.2",
+        "jest": "^25.2.3",
+        "ts-jest": "^25.2.1",
+        "typescript": "^3.8.3"
+    },
+    "eslintConfig": {
+        "extends": "byungi/typescript"
+    }
+}
