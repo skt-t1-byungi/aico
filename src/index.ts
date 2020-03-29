@@ -1,7 +1,9 @@
 type OnFulfilled<T, R> = (value: T) => R | PromiseLike<R>
 type OnRejected<T = never> = (reason: any) => T | PromiseLike<T>
-type GeneFunction<T> = (signal: AbortSignal) => Generator<any, T>
+type GenFunction<T> = (signal: AbortSignal) => Generator<any, T>
 type Options = {signal?: AbortSignal}
+
+const AbortController = this.AbortController
 
 export class AbortError extends Error {
     constructor (reason = 'Aborted') {
@@ -14,11 +16,24 @@ export class AbortError extends Error {
     }
 }
 
-export class AICo<T> {
+export default aico
+
+export function aico <T> (genFn: GenFunction<T>, opts?: Options) {
+    return new AbortInCoroutines(genFn, opts)
+}
+
+export class AbortInCoroutines<T> {
     private _ctrl: AbortController|null = null;
     private _promise: Promise<T>;
 
-    constructor (gene: GeneFunction<T>, { signal }: Options = {}) {
+    constructor (genFn: GenFunction<T>, { signal }: Options = {}) {
+        if (!AbortController) {
+            throw new TypeError('`AbortController` not found.')
+        }
+        if (!isGenFn(genFn)) {
+            throw new TypeError('Expected `genFn` to be "GeneratorFunction" type.')
+        }
+
         this._promise = new Promise((resolve, reject) => {
             if (signal) {
                 if (signal.aborted) {
@@ -28,11 +43,11 @@ export class AICo<T> {
             }
 
             const internalSignal = (this._ctrl = new AbortController()).signal
-            const iter = gene(internalSignal)
+            const iter = genFn(internalSignal)
             let pRunning: PromiseLike<any>|null = null
 
             onAbort(internalSignal, () => {
-                if (pRunning && pRunning instanceof AICo) pRunning.abort()
+                if (pRunning && pRunning instanceof AbortInCoroutines) pRunning.abort()
                 pRunning = null
 
                 const res = iter.return(undefined as any)
@@ -103,6 +118,12 @@ export class AICo<T> {
 }
 
 function noop () {}
+
+function isGenFn (fn: any): fn is GeneratorFunction {
+    if (typeof fn !== 'function') return false
+    const name = (fn.constructor && fn.constructor.name) || toString.call(fn)
+    return name.indexOf('GeneratorFunction') > -1
+}
 
 function onAbort (signal: AbortSignal, cb: () => void) {
     signal.addEventListener('abort', function f () {
