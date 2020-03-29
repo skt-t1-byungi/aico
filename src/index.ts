@@ -4,7 +4,7 @@ type GeneFunction<T> = (signal: AbortSignal) => Generator<any, T>
 type Options = {signal?: AbortSignal}
 
 export class AbortError extends Error {
-    constructor (reason = 'The routine was canceled.') {
+    constructor (reason = 'Aborted') {
         super(reason)
         this.name = 'AbortError'
     }
