@@ -49,15 +49,14 @@ export class AbortInCoroutines<T> {
 
             const internalSignal = (this._ctrl = new AbortController()).signal
             const iter = genFn(internalSignal)
-
             let pRunning: PromiseLike<any>|null = null
-            let resolver = resolve
+            let end = resolve
 
             onAbort(internalSignal, () => {
                 if (pRunning && pRunning instanceof AbortInCoroutines) pRunning.abort()
                 pRunning = null
 
-                resolver = (val: any) => {
+                end = (val: any) => {
                     if (val === void 0) {
                         reject(new AbortError())
                     } else {
@@ -67,7 +66,7 @@ export class AbortInCoroutines<T> {
 
                 const res = iter.return(undefined as any)
                 if (res.done) {
-                    resolver(res.value)
+                    end(res.value)
                 } else {
                     handleResult(res)
                 }
@@ -95,7 +94,7 @@ export class AbortInCoroutines<T> {
 
             function handleResult (res: IteratorResult<any, T>) {
                 if (res.done) {
-                    resolver(res.value)
+                    end(res.value)
                 } else {
                     if (isThenable(res.value)) {
                         (pRunning = res.value).then(
