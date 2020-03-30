@@ -1,9 +1,14 @@
 type OnFulfilled<T, R> = (value: T) => R | PromiseLike<R>
 type OnRejected<T = never> = (reason: any) => T | PromiseLike<T>
 type GenFunction<T> = (signal: AbortSignal) => Generator<any, T>
-type Options = {signal?: AbortSignal}
+type Options = {signal?: AbortSignal; AbortController?: new() => AbortController }
 
-const AbortController = this.AbortController
+declare const global: any
+const defaultAbortControllerCtor = (typeof globalThis !== 'undefined' ? globalThis
+    : typeof window !== 'undefined' ? window
+        : typeof global !== 'undefined' ? global
+            : typeof self !== 'undefined' ? self
+                : this).AbortController as new() => AbortController
 
 export class AbortError extends Error {
     constructor (reason = 'Aborted') {
@@ -26,9 +31,9 @@ export class AbortInCoroutines<T> {
     private _ctrl: AbortController|null = null;
     private _promise: Promise<T>;
 
-    constructor (genFn: GenFunction<T>, { signal }: Options = {}) {
+    constructor (genFn: GenFunction<T>, { signal, AbortController = defaultAbortControllerCtor }: Options = {}) {
         if (!AbortController) {
-            throw new TypeError('`AbortController` not found.')
+            throw new TypeError('`AbortController` polyfill is needed.')
         }
         if (!isGenFn(genFn)) {
             throw new TypeError('Expected `genFn` to be "GeneratorFunction" type.')
@@ -58,7 +63,7 @@ export class AbortInCoroutines<T> {
                 }
             })
 
-            function iterNext (arg: any) {
+            function iterNext (arg?: any) {
                 let res: IteratorResult<any, T>
                 try {
                     res = iter.next(arg)
@@ -68,7 +73,7 @@ export class AbortInCoroutines<T> {
                 handleResult(res)
             }
 
-            function iterThrow (arg: any) {
+            function iterThrow (arg?: any) {
                 let res: IteratorResult<any, T>
                 try {
                     res = iter.throw(arg)
@@ -92,15 +97,18 @@ export class AbortInCoroutines<T> {
                     }
                 }
             }
+
+            iterNext()
         })
-        this._promise.catch(noop)
+
+        this._promise.catch(noop) // prevent `unhandledrejection`
     }
 
-    then<TR1= T, TR2= never> (onfulfilled?: OnFulfilled<T, TR1> | null, onrejected?: OnRejected<TR2> | null) {
+    then<TR1=T, TR2=never> (onfulfilled?: OnFulfilled<T, TR1> | null, onrejected?: OnRejected<TR2>|null) {
         return this._promise.then(onfulfilled, onrejected)
     }
 
-    catch<TR = never> (onrejected?: OnRejected<TR> | null) {
+    catch<TR=never> (onrejected?: OnRejected<TR> | null) {
         return this._promise.catch(onrejected)
     }
 
