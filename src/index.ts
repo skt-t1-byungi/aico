@@ -34,7 +34,7 @@ export class AbortInCoroutines<T> {
     private _ctrl: AbortController|null = null;
     private _promise: Promise<T>;
 
-    constructor (genFn: GenFunction<T>, { signal, AbortController = defaultAbortControllerCtor }: AicoOptions = {}) {
+    constructor (gen: GenFunction<T>, { signal, AbortController = defaultAbortControllerCtor }: AicoOptions = {}) {
         if (!AbortController) {
             throw new TypeError('`AbortController` polyfill(or ponyfill) is needed.')
         }
@@ -48,7 +48,7 @@ export class AbortInCoroutines<T> {
             }
 
             const internalSignal = (this._ctrl = new AbortController()).signal
-            const iter = genFn(internalSignal)
+            const iter = gen(internalSignal)
             let pRunning: PromiseLike<any>|null = null
             let end = resolve
 
@@ -57,7 +57,7 @@ export class AbortInCoroutines<T> {
                 pRunning = null
 
                 end = (val: any) => {
-                    if (val === void 0) {
+                    if (val === undefined) {
                         reject(new AbortError())
                     } else {
                         resolve(val)
@@ -68,7 +68,7 @@ export class AbortInCoroutines<T> {
                 if (res.done) {
                     end(res.value)
                 } else {
-                    handleResult(res)
+                    handle(res)
                 }
             })
 
@@ -79,7 +79,7 @@ export class AbortInCoroutines<T> {
                 } catch (err) {
                     return reject(err)
                 }
-                handleResult(res)
+                handle(res)
             }
 
             function iterThrow (arg?: any) {
@@ -89,10 +89,10 @@ export class AbortInCoroutines<T> {
                 } catch (err) {
                     return reject(err)
                 }
-                handleResult(res)
+                handle(res)
             }
 
-            function handleResult (res: IteratorResult<any, T>) {
+            function handle (res: IteratorResult<any, T>) {
                 if (res.done) {
                     end(res.value)
                 } else {

@@ -65,15 +65,16 @@ test('aborted finally', async () => {
 })
 
 test('yield after abort', async () => {
+    expect.assertions(2)
     const p = aico(function * () {
         try {
             yield Promise.resolve()
         } finally {
-            yield 1
+            expect(yield 1).toBe(1) // 1
         }
     })
     p.abort()
-    await expect(p).rejects.toThrow('Aborted')
+    await expect(p).rejects.toThrow('Aborted') // 2
 })
 
 test('return after abort', async () => {
