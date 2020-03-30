@@ -38,6 +38,7 @@ export class AbortInCoroutines<T> {
         if (!AbortController) {
             throw new TypeError('`AbortController` polyfill(or ponyfill) is needed.')
         }
+
         this._promise = new Promise((resolve, reject) => {
             if (signal) {
                 if (signal.aborted) {
@@ -57,7 +58,7 @@ export class AbortInCoroutines<T> {
                 pRunning = null
 
                 resolver = (val: any) => {
-                    if (val === undefined) {
+                    if (val === void 0) {
                         reject(new AbortError())
                     } else {
                         resolve(val)

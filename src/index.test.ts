@@ -53,40 +53,18 @@ test('aborted finally', async () => {
     await expect(p).rejects.toThrow('Aborted')
 })
 
-test('overwrite results by finally', async () => {
+test('yield after aborted', async () => {
     const p1 = aico(function * () {
-        try {
-            yield Promise.resolve()
-        } finally {
-        }
-    })
-    p1.abort()
-    await expect(p1).rejects.toThrow('Aborted')
-
-    const p2 = aico(function * () {
         try {
             yield Promise.resolve()
         } finally {
             yield 1
         }
     })
-    p2.abort()
-    await expect(p2).rejects.toThrow('Aborted')
+    p1.abort()
+    await expect(p1).rejects.toThrow('Aborted')
 
-    const p3 = aico(function * () {
-        try {
-            yield Promise.resolve()
-        } finally {
-            // eslint-disable-next-line no-unsafe-finally
-            return 1
-        }
-    })
-    p3.abort()
-    await expect(p3).resolves.toBe(1)
-})
-
-test('yield after aborted', async () => {
-    const p = aico(function * () {
+    const p2 = aico(function * () {
         try {
             yield Promise.resolve()
             fail()
@@ -97,8 +75,8 @@ test('yield after aborted', async () => {
             return 3
         }
     })
-    p.abort()
-    await expect(p).resolves.toBe(3)
+    p2.abort()
+    await expect(p2).resolves.toBe(3)
 })
 
 test('abort with `opts.signal`', async () => {
