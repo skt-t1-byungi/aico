@@ -1,7 +1,10 @@
 type OnFulfilled<T, R> = (value: T) => R | PromiseLike<R>
 type OnRejected<T = never> = (reason: any) => T | PromiseLike<T>
 type GenFunction<T> = (signal: AbortSignal) => Generator<any, T>
-type Options = {signal?: AbortSignal; AbortController?: new() => AbortController }
+type AsyncFunction<R> = (...args: any) => PromiseLike<R>
+type AicoOptions = {signal?: AbortSignal; AbortController?: new() => AbortController }
+
+export type AsyncResult<F extends AsyncFunction<any>> = F extends AsyncFunction<infer R> ? R : never
 
 declare const global: any
 const defaultAbortControllerCtor = (typeof globalThis !== 'undefined' ? globalThis
@@ -23,7 +26,7 @@ export class AbortError extends Error {
 
 export default aico
 
-export function aico <T> (genFn: GenFunction<T>, opts?: Options) {
+export function aico <T> (genFn: GenFunction<T>, opts?: AicoOptions) {
     return new AbortInCoroutines(genFn, opts)
 }
 
@@ -31,14 +34,10 @@ export class AbortInCoroutines<T> {
     private _ctrl: AbortController|null = null;
     private _promise: Promise<T>;
 
-    constructor (genFn: GenFunction<T>, { signal, AbortController = defaultAbortControllerCtor }: Options = {}) {
+    constructor (genFn: GenFunction<T>, { signal, AbortController = defaultAbortControllerCtor }: AicoOptions = {}) {
         if (!AbortController) {
-            throw new TypeError('`AbortController` polyfill is needed.')
+            throw new TypeError('`AbortController` polyfill(or ponyfill) is needed.')
         }
-        if (!isGenFn(genFn)) {
-            throw new TypeError('Expected `genFn` to be "GeneratorFunction" type.')
-        }
-
         this._promise = new Promise((resolve, reject) => {
             if (signal) {
                 if (signal.aborted) {
@@ -126,12 +125,6 @@ export class AbortInCoroutines<T> {
 }
 
 function noop () {}
-
-function isGenFn (fn: any): fn is GeneratorFunction {
-    if (typeof fn !== 'function') return false
-    const name = (fn.constructor && fn.constructor.name) || toString.call(fn)
-    return name.indexOf('GeneratorFunction') > -1
-}
 
 function onAbort (signal: AbortSignal, cb: () => void) {
     signal.addEventListener('abort', function f () {

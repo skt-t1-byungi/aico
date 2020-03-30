@@ -1,13 +1,15 @@
 {
     "compilerOptions": {
         "target": "ES5",
-        "module": "commonjs",
-        "lib": ["DOM", "ES2015", "ES2018.Promise"],
+        "module": "ESNext",
+        "lib": ["DOM", "ESNext"],
         "declaration": true,
         "outDir": "./dist",
-        "strict": true
+        "strict": true,
+        "moduleResolution": "Node",
+        "esModuleInterop": true
     },
     "include": [
-        "src"
+        "./src/index.ts"
     ]
 }
