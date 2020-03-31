@@ -24,27 +24,21 @@ export class AbortError extends Error {
     }
 }
 
-export default aico
-
-export function aico <T> (genFn: GenFunction<T>, opts?: AicoOptions) {
-    return new AbortInCoroutines(genFn, opts)
-}
-
 export class AbortInCoroutines<T> {
     private _ctrl: AbortController|null = null;
     private _promise: Promise<T>;
     private _isAborted = false
 
-    constructor (gen: GenFunction<T>, { signal: inSignal, AbortController = defaultAbortControllerCtor }: AicoOptions = {}) {
+    constructor (gen: GenFunction<T>, { signal: optSig, AbortController = defaultAbortControllerCtor }: AicoOptions = {}) {
         if (!AbortController) {
             throw new TypeError('`AbortController` polyfill(or ponyfill) is needed.')
         }
 
         this._promise = new Promise((_resolve, _reject) => {
             let offs: Array<() => void>|null = []
-            const on = (s: AbortSignal, cb: () => void) => {
-                s.addEventListener('abort', cb)
-                offs!.push(() => s.removeEventListener('abort', cb))
+            const on = (sig: AbortSignal, cb: () => void) => {
+                sig.addEventListener('abort', cb)
+                offs!.push(() => sig.removeEventListener('abort', cb))
             }
             const cleanup = () => {
                 offs!.forEach(off => off())
@@ -58,22 +52,22 @@ export class AbortInCoroutines<T> {
                 reject(new AbortError(reason))
             }
 
-            if (inSignal) {
-                if (inSignal.aborted) {
+            if (optSig) {
+                if (optSig.aborted) {
                     return abort('`options.signal` is already aborted.')
                 }
-                on(inSignal, () => this.abort())
+                on(optSig, () => this.abort())
             }
 
             const { signal } = this._ctrl = new AbortController()
             const iter = gen(signal)
 
-            let pRunning: PromiseLike<any>|null = null
+            let pRun: PromiseLike<any>|null = null
             let done = resolve
 
             on(signal, () => {
-                if (pRunning && pRunning instanceof AbortInCoroutines) pRunning.abort()
-                pRunning = null
+                if (pRun && pRun instanceof AbortInCoroutines) pRun.abort()
+                pRun = null
 
                 done = (val: any) => {
                     if (val === undefined) {
@@ -116,9 +110,9 @@ export class AbortInCoroutines<T> {
                     done(res.value)
                 } else {
                     if (isThenable(res.value)) {
-                        (pRunning = res.value).then(
-                            val => pRunning === res.value && iterNext(val),
-                            err => pRunning === res.value && iterThrow(err)
+                        (pRun = res.value).then(
+                            val => pRun === res.value && iterNext(val),
+                            err => pRun === res.value && iterThrow(err)
                         )
                     } else {
                         iterNext(res.value)
@@ -152,6 +146,12 @@ export class AbortInCoroutines<T> {
          this._ctrl?.abort()
     }
 }
+
+export function aico <T> (genFn: GenFunction<T>, opts?: AicoOptions) {
+    return new AbortInCoroutines(genFn, opts)
+}
+
+export default aico
 
 function noop () {}
 
