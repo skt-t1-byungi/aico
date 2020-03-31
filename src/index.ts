@@ -1,8 +1,8 @@
-type OnFulfilled<T, R> = (value: T) => R | PromiseLike<R>
-type OnRejected<T = never> = (reason: any) => T | PromiseLike<T>
+type OnFulfilled<T, R> = (value: T) => R|PromiseLike<R>
+type OnRejected<T = never> = (reason: any) => T|PromiseLike<T>
 type GenFunction<T> = (signal: AbortSignal) => Generator<any, T>
 type AsyncFunction<R> = (...args: any) => PromiseLike<R>
-type AicoOptions = {signal?: AbortSignal; AbortController?: new() => AbortController }
+type AicoOptions = {signal?: AbortSignal; AbortController?: new() => AbortController}
 
 export type AsyncResult<F extends AsyncFunction<any>> = F extends AsyncFunction<infer R> ? R : never
 
@@ -14,8 +14,8 @@ const defaultAbortControllerCtor = (typeof globalThis !== 'undefined' ? globalTh
                 : this).AbortController as new() => AbortController
 
 export class AbortError extends Error {
-    constructor (reason = 'Aborted') {
-        super(reason)
+    constructor (msg = 'Aborted') {
+        super(msg)
         this.name = 'AbortError'
     }
 
@@ -36,20 +36,21 @@ export class AbortInCoroutines<T> {
 
         this._promise = new Promise((_resolve, _reject) => {
             let offs: Array<() => void>|null = []
-            const on = (sig: AbortSignal, cb: () => void) => {
+            function on (sig: AbortSignal, cb: () => void) {
                 sig.addEventListener('abort', cb)
                 offs!.push(() => sig.removeEventListener('abort', cb))
             }
+
             const cleanup = () => {
                 offs!.forEach(off => off())
                 offs = null
                 this._ctrl = null
             }
             const resolve = (val: T) => (_resolve(val), cleanup())
-            const reject = (err: Error) => (_reject(err), cleanup())
-            const abort = (reason?: string) => {
+            const reject = (err: any) => (_reject(err), cleanup())
+            const abort = (msg?: string) => {
                 this._isAborted = true
-                reject(new AbortError(reason))
+                reject(new AbortError(msg))
             }
 
             if (optSig) {
@@ -126,15 +127,15 @@ export class AbortInCoroutines<T> {
         this._promise.catch(noop) // prevent `unhandledrejection`
     }
 
-    then<TR1=T, TR2=never> (onfulfilled?: OnFulfilled<T, TR1> | null, onrejected?: OnRejected<TR2>|null) {
+    then<TR1=T, TR2=never> (onfulfilled?: OnFulfilled<T, TR1>|null, onrejected?: OnRejected<TR2>|null) {
         return this._promise.then(onfulfilled, onrejected)
     }
 
-    catch<TR=never> (onrejected?: OnRejected<TR> | null) {
+    catch<TR=never> (onrejected?: OnRejected<TR>|null) {
         return this._promise.catch(onrejected)
     }
 
-    finally (onfinally?: () => void | null) {
+    finally (onfinally?: (() => void)|null) {
         return this._promise.finally(onfinally)
     }
 
