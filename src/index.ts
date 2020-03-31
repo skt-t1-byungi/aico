@@ -33,32 +33,51 @@ export function aico <T> (genFn: GenFunction<T>, opts?: AicoOptions) {
 export class AbortInCoroutines<T> {
     private _ctrl: AbortController|null = null;
     private _promise: Promise<T>;
+    private _isAborted = false
 
-    constructor (gen: GenFunction<T>, { signal, AbortController = defaultAbortControllerCtor }: AicoOptions = {}) {
+    constructor (gen: GenFunction<T>, { signal: inSignal, AbortController = defaultAbortControllerCtor }: AicoOptions = {}) {
         if (!AbortController) {
             throw new TypeError('`AbortController` polyfill(or ponyfill) is needed.')
         }
 
-        this._promise = new Promise((resolve, reject) => {
-            if (signal) {
-                if (signal.aborted) {
-                    return reject(new AbortError('`options.signal` is already aborted.'))
-                }
-                onAbort(signal, () => this.abort())
+        this._promise = new Promise((_resolve, _reject) => {
+            let offs: Array<() => void>|null = []
+            const on = (s: AbortSignal, cb: () => void) => {
+                s.addEventListener('abort', cb)
+                offs!.push(() => s.removeEventListener('abort', cb))
+            }
+            const cleanup = () => {
+                offs!.forEach(off => off())
+                offs = null
+                this._ctrl = null
+            }
+            const resolve = (val: T) => (_resolve(val), cleanup())
+            const reject = (err: Error) => (_reject(err), cleanup())
+            const abort = (reason?: string) => {
+                this._isAborted = true
+                reject(new AbortError(reason))
             }
 
-            const internalSignal = (this._ctrl = new AbortController()).signal
-            const iter = gen(internalSignal)
-            let pRunning: PromiseLike<any>|null = null
-            let end = resolve
+            if (inSignal) {
+                if (inSignal.aborted) {
+                    return abort('`options.signal` is already aborted.')
+                }
+                on(inSignal, () => this.abort())
+            }
 
-            onAbort(internalSignal, () => {
+            const { signal } = this._ctrl = new AbortController()
+            const iter = gen(signal)
+
+            let pRunning: PromiseLike<any>|null = null
+            let done = resolve
+
+            on(signal, () => {
                 if (pRunning && pRunning instanceof AbortInCoroutines) pRunning.abort()
                 pRunning = null
 
-                end = (val: any) => {
+                done = (val: any) => {
                     if (val === undefined) {
-                        reject(new AbortError())
+                        abort()
                     } else {
                         resolve(val)
                     }
@@ -66,7 +85,7 @@ export class AbortInCoroutines<T> {
 
                 const res = iter.return(undefined as any)
                 if (res.done) {
-                    end(res.value)
+                    done(res.value)
                 } else {
                     handle(res)
                 }
@@ -94,7 +113,7 @@ export class AbortInCoroutines<T> {
 
             function handle (res: IteratorResult<any, T>) {
                 if (res.done) {
-                    end(res.value)
+                    done(res.value)
                 } else {
                     if (isThenable(res.value)) {
                         (pRunning = res.value).then(
@@ -126,7 +145,7 @@ export class AbortInCoroutines<T> {
     }
 
     get isAborted () {
-        return !!this._ctrl?.signal.aborted
+        return this._isAborted
     }
 
     abort (): void {
@@ -135,13 +154,6 @@ export class AbortInCoroutines<T> {
 }
 
 function noop () {}
-
-function onAbort (signal: AbortSignal, cb: () => void) {
-    signal.addEventListener('abort', function f () {
-        signal.removeEventListener('abort', f)
-        cb()
-    })
-}
 
 function isThenable<T> (promise: any): promise is PromiseLike<T> {
     return promise && typeof promise.then === 'function'
