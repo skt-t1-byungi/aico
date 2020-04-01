@@ -9,7 +9,7 @@ import aico from 'aico'
 
 const promise = aico(function * (signal) {
     try {
-        const response = yield fetch('/very-slow-api', { signal })
+        const resp = yield fetch('/very-slow-api', { signal })
 
         console.log('No print here.')
     } finally {
@@ -19,9 +19,17 @@ const promise = aico(function * (signal) {
     }
 })
 
+promise.catch(err => {
+    console.log(`message: ${err.message}`)
+    console.log(`isAborted: ${err.isAborted}`)
+})
+
 setTimeout(() => {
-    promise.abort() // => aborted!
-}, 50)
+    promise.abort()
+    // => aborted!
+    // => message: Aborted
+    // => isAborted: true
+}, 100)
 ```
 
 ## Install
@@ -35,10 +43,10 @@ npm install aico
 ```js
 import { AbortInCoroutines } from 'aico'
 
-const promise = new AbortInCoroutines(function * (signal) {
-    /* ... */
-})
+const promise = new AbortInCoroutines(function * (signal) { /* ... */ })
 ```
+
+### aico(generator)
 
 ### promise.abort()
 
