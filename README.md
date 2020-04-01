@@ -28,8 +28,8 @@ promise.catch(err => {
 
 setTimeout(() => promise.abort(), 150) // <= After 150ms
 ```
-```sh
-# output
+```
+> output
 1. This is printed.
 3. aborted!
 4. message: Aborted
