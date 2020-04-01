@@ -1,6 +1,6 @@
 {
     "name": "aico",
-    "description": "abort in co-routines",
+    "description": "abort in coroutines",
     "repository": "https://github.com/skt-t1-byungi/aico.git",
     "author": "skt-t1-byungi <tiniwz@gmail.com>",
     "keywords": [
@@ -15,13 +15,18 @@
         "cancelable",
         "cancellation"
     ],
-    "version": "0.0.0",
-    "main": "index.js",
     "license": "MIT",
+    "version": "0.0.0",
+    "main": "dist.index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "clean": "rm -rf dist",
         "build": "npm run clean && tsc",
-        "test": "jest"
+        "test": "jest",
+        "prepublishOnly": "npm run test && npm run build"
     },
     "devDependencies": {
         "@types/jest": "^25.1.4",

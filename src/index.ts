@@ -43,8 +43,7 @@ export class AbortInCoroutines<T> {
 
             const cleanup = () => {
                 offs!.forEach(off => off())
-                offs = null
-                this._ctrl = null
+                this._ctrl = offs = null
             }
             const resolve = (val: T) => (_resolve(val), cleanup())
             const reject = (err: any) => (_reject(err), cleanup())
@@ -63,12 +62,12 @@ export class AbortInCoroutines<T> {
             const { signal } = this._ctrl = new AbortController()
             const iter = gen(signal)
 
-            let pRun: PromiseLike<any>|null = null
+            let pRunning: PromiseLike<any>|null = null
             let done = resolve
 
             on(signal, () => {
-                if (pRun && pRun instanceof AbortInCoroutines) pRun.abort()
-                pRun = null
+                if (pRunning && pRunning instanceof AbortInCoroutines) pRunning.abort()
+                pRunning = null
 
                 done = (val: any) => {
                     if (val === undefined) {
@@ -111,9 +110,9 @@ export class AbortInCoroutines<T> {
                     done(res.value)
                 } else {
                     if (isThenable(res.value)) {
-                        (pRun = res.value).then(
-                            val => pRun === res.value && iterNext(val),
-                            err => pRun === res.value && iterThrow(err)
+                        (pRunning = res.value).then(
+                            val => pRunning === res.value && iterNext(val),
+                            err => pRunning === res.value && iterThrow(err)
                         )
                     } else {
                         iterNext(res.value)
