@@ -53,7 +53,7 @@ const promise = new AbortInCoroutines(function * (signal) { /* ... */ })
 promise.then(/* ... */)
 ```
 
-In the generator, `yield` is the same as async function's `await`. Likewise, it waits for promise result. And the generator parameter `signal` is [AbortSignal](https://developer.mozilla.org/docs/Web/API/AbortSignal) that can cancel DOM requests such as fetch.
+In the generator, `yield` is the same as async function's `await`. Likewise, wait for promise result. And the parameter `signal` is [AbortSignal](https://developer.mozilla.org/docs/Web/API/AbortSignal) that can cancel DOM requests such as fetch.
 
 ```js
 const promise = new AbortInCoroutines(function * (signal) {
