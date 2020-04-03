@@ -1,4 +1,4 @@
-import { aico } from '.'
+import { aico } from '../src'
 
 test('promiseLike', async () => {
     await expect(aico(function * () { return 1 })).resolves.toBe(1)
