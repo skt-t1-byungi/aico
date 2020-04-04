@@ -1,5 +1,11 @@
 # A.I.C.O
+
 > **A**bort **I**n **CO**routines
+
+[![npm](https://flat.badgen.net/npm/v/aico)](https://www.npmjs.com/package/aico)
+[![npm](https://flat.badgen.net/npm/license/aico)](https://github.com/skt-t1-byungi/aico/blob/master/LICENSE)
+
+`aico` was inspired by redux-saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html). I wanted to use it in promise and found several alternatives. But they are a little bit verbose or lacking. `aico` writes less and does more. It supports [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and typescript (but not enough).
 
 ![aico](./aico.jpg)
 
