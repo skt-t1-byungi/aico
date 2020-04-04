@@ -73,7 +73,7 @@ const promise = new AbortInCoroutines(function * (signal) {
 promise.abort() // <= Abort `/api/request` request.
 ```
 
-In addition, `signal` has a `aborted` that indicates whether the promise was aborted or not.
+`signal` has a `aborted` that indicates whether the promise was aborted or not.
 
 ```js
 const promise = new AbortInCoroutines(function * (signal) {
@@ -90,6 +90,27 @@ const promise = new AbortInCoroutines(function * (signal) {
 
 promise.abort() // => aborted!
 ```
+
+If the yielded promise is created by `aico`, the abortion is propagated.
+
+```js
+const subTask = () => aico(function * (signal) {
+    try {
+        /* ... */
+    } finally {
+        if (signal.aborted) {
+            console.log('subTask is aborted!')
+        }
+    }
+})
+
+const promise = aico(function * () {
+    yield subTask()
+})
+
+promise.abort() // => subTask is aborted!
+```
+
 
 #### options
 ##### AbortController
@@ -139,28 +160,80 @@ console.log(promise.isAborted) // => true
 ### promise.abort()
 Abort the promise.
 
-## Tips
-### Abortion propagation
-If the yielded promise is created by `aico`, the abortion is propagated.
+### all(values)
+This is a abortable [`Promise.all()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
 
 ```js
-const subTask = (taskId) => aico(function * (signal) {
+import { aico, all } from 'aico'
+
+const fetchData = url => aico(function * (signal) {
     try {
         /* ... */
     } finally {
         if (signal.aborted) {
-            console.log('subTask is aborted!')
+            console.log(`aborted : ${url}`)
         }
     }
 })
 
-const promise = aico(function * () {
-    yield subTask('taskId')
-})
+const promise = all([
+    fetchData('/api/1'),
+    fetchData('/api/2'),
+    fetchData('/api/3')
+])
 
-promise.abort() // => subTask is aborted!
+promise.abort()
+// => aborted : /api/1
+// => aborted : /api/2
+// => aborted : /api/3
 ```
 
+If one is rejected, the other promise created by `aico` is automatically aborted.
+
+```js
+const promise = all([
+    fetchData('/api/1'),
+    fetchData('/api/2'),
+    fetchData('/api/3'),
+    Promise.reject('fail')
+])
+// (This is printed immediately)
+// => aborted : /api/1
+// => aborted : /api/2
+// => aborted : /api/3
+```
+
+### race(values)
+This is a abortable [`Promise.race()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
+```js
+import { aico, race } from 'aico'
+
+const timeout = ms => new Promise((_, reject) => setTimeout(reject, ms))
+
+const promise = race([
+    fetchData('/delay/600'), // <= This api takes 600ms.
+    timeout(500)
+])
+
+// (After 500ms)
+// => aborted : /delay/600
+```
+Likewise, if one is rejected, the other promise created by aico is automatically aborted.
+
+### abortify(fn)
+This function wraps a custom function that handles multiple promises to return an abortable promise.
+
+```js
+import { abortify } from 'aico'
+
+const any = abortify(Promise.any) // <= `Promise.any` is experimental and not fully supported.
+
+const promise = any([ /* ... */ ])
+
+promise.abort()
+```
+
+## Tips
 ### Type inference of yielded promise
 ```js
 const promise = aico(function * () {

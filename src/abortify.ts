@@ -1,7 +1,7 @@
 import AbortInCoroutines from './AbortInCoroutines'
 
-export default function <V, R> (fn: (values: Array<V|PromiseLike<V>>) => PromiseLike<R>) {
-    return (values: Array<V|PromiseLike<V>>) => new AbortInCoroutines<R>(function * (signal) {
+export default function <T=any, R=any> (fn: (values: Array<T|PromiseLike<T>>) => PromiseLike<R>) {
+    return (values: Array<T|PromiseLike<T>>) => new AbortInCoroutines<R>(function * (signal) {
         let isErr = false
         try {
             return (yield fn(values).then(
@@ -13,8 +13,8 @@ export default function <V, R> (fn: (values: Array<V|PromiseLike<V>>) => Promise
             ) as R
         } finally {
             if (isErr || signal.aborted) {
-                values.forEach(p => {
-                    if (p instanceof AbortInCoroutines && !p.isAborted) p.abort()
+                values.forEach(v => {
+                    if (v instanceof AbortInCoroutines && !v.isAborted) v.abort()
                 })
             }
         }
