@@ -176,7 +176,7 @@ console.log(promise.isAborted) // => true
 Abort the promise.
 
 ### all(values)
-This is a abortable [`Promise.all()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
+This is an abortable [`Promise.all()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
 
 ```js
 import { aico, all } from 'aico'
@@ -219,7 +219,7 @@ const promise = all([
 ```
 
 ### race(values)
-This is a abortable [`Promise.race()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
+This is an abortable [`Promise.race()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
 ```js
 import { race } from 'aico'
 
