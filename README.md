@@ -236,7 +236,7 @@ const promise = race([
 Likewise, if one is rejected, the other promise created by aico is automatically aborted.
 
 ### abortify(fn)
-This function wraps a custom function that handles multiple promises to make it abortable.
+This function wraps to make it abortable for a custom function that handles multiple promises.
 
 ```js
 import { abortify } from 'aico'
