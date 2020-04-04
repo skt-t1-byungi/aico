@@ -1,7 +1,7 @@
 import abortify from './abortify'
 import AbortInCoroutines from './AbortInCoroutines'
 
-export default abortify(Promise.all) as {
+export default abortify(Promise.all.bind(Promise)) as {
     <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AbortInCoroutines<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
     <T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AbortInCoroutines<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
     <T1, T2, T3, T4, T5, T6, T7, T8>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AbortInCoroutines<[T1, T2, T3, T4, T5, T6, T7, T8]>;

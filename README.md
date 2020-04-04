@@ -1,13 +1,15 @@
 # A.I.C.O
 
-> **A**bort **I**n **CO**routines
+> **A**bort **I**n **CO**routines (promises)
 
 [![npm](https://flat.badgen.net/npm/v/aico)](https://www.npmjs.com/package/aico)
 [![npm](https://flat.badgen.net/npm/license/aico)](https://github.com/skt-t1-byungi/aico/blob/master/LICENSE)
 
-`aico` was inspired by redux-saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html). I wanted to use it in promise and found several alternatives. But they are a little bit verbose or lacking. `aico` writes less and does more. It supports [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and typescript (but not enough).
+`aico` was inspired by redux-saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html). I wanted to use it in promises and found several alternatives. But they are a little bit verbose or lacking. `aico` writes less and does more. It supports [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and typescript (but not enough).
 
 ![aico](./aico.jpg)
+
+(I enjoyed watching [A.I.C.O](https://www.netflix.com/title/80161848) on Netflix)
 
 ## Example
 ```js
@@ -51,7 +53,7 @@ npm install aico
 
 ## API
 ### new AbortInCoroutines(generator, options?)
-Create a abortable promise using a generator. In the generator, `yield` is the same as async function's `await`. Likewise, wait for promise result.
+Create an abortable promise using a generator. In the generator, `yield` is the same as async function's `await`. Likewise, wait for a promise result.
 
 ```js
 import { AbortInCoroutines } from 'aico'
@@ -79,7 +81,7 @@ const promise = new AbortInCoroutines(function * (signal) {
 promise.abort() // <= Abort `/api/request` request.
 ```
 
-`signal` has a `aborted` that indicates whether the promise was aborted or not.
+`signal` has an `aborted` that indicates whether the promise was aborted or not.
 
 ```js
 const promise = new AbortInCoroutines(function * (signal) {
@@ -100,7 +102,7 @@ promise.abort() // => aborted!
 If the yielded promise is created by `aico`, the abortion is propagated.
 
 ```js
-const subTask = () => aico(function * (signal) {
+const subTask = () => new AbortInCoroutines(function * (signal) {
     try {
         /* ... */
     } finally {
@@ -110,7 +112,7 @@ const subTask = () => aico(function * (signal) {
     }
 })
 
-const promise = aico(function * () {
+const promise = new AbortInCoroutines(function * () {
     yield subTask()
 })
 
@@ -129,7 +131,7 @@ new AbortInCoroutines(function * (signal) { /* ... */ }, { AbortController })
 ```
 
 ##### signal
-This is an option to abort the coroutine with the signal of the external controller.
+This is an option to abort the promise with the signal of the external controller.
 
 ```js
 const controller = new AbortController()
@@ -149,6 +151,13 @@ const promise = new AbortInCoroutines(function * (signal) {
 
 ### aico(generator, options?)
 This function can be used instead of the verbose `new AbortInCoroutines()`.
+
+```js
+import aico from 'aico'
+
+//or
+import { aico } from 'aico'
+```
 
 ### promise.isAborted
 Returns whether the promise is aborted or not.
@@ -212,7 +221,7 @@ const promise = all([
 ### race(values)
 This is a abortable [`Promise.race()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
 ```js
-import { aico, race } from 'aico'
+import { race } from 'aico'
 
 const timeout = ms => new Promise((_, reject) => setTimeout(reject, ms))
 
@@ -227,12 +236,12 @@ const promise = race([
 Likewise, if one is rejected, the other promise created by aico is automatically aborted.
 
 ### abortify(fn)
-This function wraps a custom function that handles multiple promises to return an abortable promise.
+This function wraps a custom function that handles multiple promises to make it abortable.
 
 ```js
 import { abortify } from 'aico'
 
-const any = abortify(Promise.any) // <= `Promise.any` is experimental and not fully supported.
+const any = abortify(Promise.any.bind(Promise)) // <= `Promise.any` is experimental and not fully supported.
 
 const promise = any([ /* ... */ ])
 

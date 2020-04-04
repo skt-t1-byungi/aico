@@ -6,5 +6,6 @@ module.exports = {
                 target: 'ES6'
             }
         }
-    }
+    },
+    testPathIgnorePatterns: ['helpers']
 }
