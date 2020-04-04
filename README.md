@@ -272,4 +272,4 @@ const promise = aico(function * () {
 ```
 
 ## License
-MIT
+MIT © [skt-t1-byungi](https://github.com/)
