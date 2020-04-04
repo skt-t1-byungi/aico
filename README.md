@@ -5,7 +5,7 @@
 [![npm](https://flat.badgen.net/npm/v/aico)](https://www.npmjs.com/package/aico)
 [![npm](https://flat.badgen.net/npm/license/aico)](https://github.com/skt-t1-byungi/aico/blob/master/LICENSE)
 
-`aico` was inspired by redux-saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html). I wanted to use it in promises and found several alternatives. But they are a little bit verbose or lacking. `aico` writes less and does more. It supports [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and typescript (but not enough).
+`aico` was inspired by redux-saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html). I wanted to use it in promises and found several alternatives. But they are a little bit verbose or lacking. `aico` writes less and does more. And it supports [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and typescript (but not enough).
 
 ![aico](./aico.jpg)
 
