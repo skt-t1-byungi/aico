@@ -1,6 +1,6 @@
 {
     "name": "aico",
-    "description": "abort in coroutines",
+    "description": "abort in coroutines (promises)",
     "repository": "https://github.com/skt-t1-byungi/aico.git",
     "author": "skt-t1-byungi <tiniwz@gmail.com>",
     "keywords": [

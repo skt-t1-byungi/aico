@@ -1,4 +1,4 @@
-# A.I.C.O
+# A.I.C.O 🦄
 
 > **A**bort **I**n **CO**routines (promises)
 
@@ -53,7 +53,7 @@ npm install aico
 
 ## API
 ### new AbortInCoroutines(generator, options?)
-Create an abortable promise using a generator. In the generator, `yield` is the same as async function's `await`. Likewise, wait for a promise result.
+Create an abortable promise using a generator. In a generator, `yield` is the same as async function's `await`. Likewise, wait for a promise result.
 
 ```js
 import { AbortInCoroutines } from 'aico'
@@ -131,7 +131,7 @@ new AbortInCoroutines(function * (signal) { /* ... */ }, { AbortController })
 ```
 
 ##### signal
-This is an option to abort the promise with the signal of the external controller.
+This is an option to abort a promise with the signal of the external controller.
 
 ```js
 const controller = new AbortController()
