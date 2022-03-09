@@ -30,16 +30,9 @@
     },
     "devDependencies": {
         "@types/jest": "^25.1.4",
-        "eslint": "^6.8.0",
-        "eslint-config-byungi": "^0.10.4",
         "jest": "^25.2.4",
+        "prettier": "^2.5.1",
         "ts-jest": "^25.3.0",
-        "typescript": "^3.8.3"
-    },
-    "eslintConfig": {
-        "extends": "byungi/typescript"
-    },
-    "eslintIgnore": [
-        "dist"
-    ]
+        "typescript": "^4.6.2"
+    }
 }
