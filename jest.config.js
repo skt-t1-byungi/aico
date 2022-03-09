@@ -3,9 +3,9 @@ module.exports = {
     globals: {
         'ts-jest': {
             tsConfig: {
-                target: 'ES6'
-            }
-        }
+                target: 'ES6',
+            },
+        },
     },
-    testPathIgnorePatterns: ['helpers']
+    testPathIgnorePatterns: ['helpers'],
 }

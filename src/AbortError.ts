@@ -1,10 +1,10 @@
 export default class AbortError extends Error {
-    constructor (msg = 'Aborted') {
+    constructor(msg = 'Aborted') {
         super(msg)
         this.name = 'AbortError'
     }
 
-    get isAborted () {
+    get isAborted() {
         return true
     }
 }
