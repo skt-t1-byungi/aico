@@ -1,5 +1,6 @@
+import { test, expect } from 'vitest'
 import { aico } from '../src'
-import delay from './helpers/delay'
+import { delay } from './_helpers'
 
 test('promiseLike', async () => {
     await expect(
@@ -48,7 +49,7 @@ test('catch rejected promise', async () => {
             } catch (err) {
                 return err
             }
-            fail()
+            expect.fail()
         })
     ).resolves.toBe(inputErr)
 })
@@ -56,8 +57,8 @@ test('catch rejected promise', async () => {
 test('yield*', async () => {
     expect.assertions(3)
     function* sub() {
-        expect(yield 1).toBe(1) // 1
-        expect(yield Promise.resolve(2)).toBe(2) // 2
+        expect(yield 1).toBe(1)
+        expect(yield Promise.resolve(2)).toBe(2)
         return 3
     }
     await expect(
@@ -82,9 +83,9 @@ test('aborted finally', async () => {
     const p = aico(function* (signal) {
         try {
             yield delay(0)
-            fail()
+            expect.fail()
         } catch {
-            fail()
+            expect.fail()
         } finally {
             expect(signal.aborted).toBe(true)
         }
@@ -110,7 +111,7 @@ test('return after abort', async () => {
     const p = aico(function* () {
         try {
             yield delay(0)
-            fail()
+            expect.fail()
         } finally {
             // eslint-disable-next-line no-unsafe-finally
             return 1
@@ -123,7 +124,7 @@ test('yield and return after abort', async () => {
     const p = aico(function* () {
         try {
             yield delay(0)
-            fail()
+            expect.fail()
         } finally {
             expect(yield 1).toBe(1)
             expect(yield Promise.resolve(2)).toBe(2)
@@ -154,7 +155,7 @@ test('abort with aborted `opts.signal`', async () => {
     ctrl.abort()
     const p = aico(
         function* () {
-            fail()
+            expect.fail()
         },
         { signal: ctrl.signal }
     )
@@ -167,7 +168,7 @@ test('abort propagation', async () => {
         try {
             expect(signal.aborted).toBe(false) // 1
             yield delay(0)
-            fail()
+            expect.fail()
         } finally {
             expect(signal.aborted).toBe(true) // 2
         }
@@ -176,7 +177,7 @@ test('abort propagation', async () => {
         try {
             expect(signal.aborted).toBe(false) // 3
             yield child
-            fail()
+            expect.fail()
         } finally {
             expect(signal.aborted).toBe(true) // 4
         }

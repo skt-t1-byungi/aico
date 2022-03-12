@@ -1,5 +1,6 @@
+import { test, expect, fn } from 'vitest'
 import { all } from '../src'
-import task from './helpers/task'
+import { task } from './_helpers'
 
 test('resolve', async () => {
     const p = all([Promise.resolve(1), Promise.resolve('2')])
@@ -12,7 +13,7 @@ test('reject', async () => {
 })
 
 test('propagation by abort', async () => {
-    const f = jest.fn()
+    const f = fn()
     const p = all([task(f), task(f)])
     p.abort()
     await expect(p).rejects.toThrow('Aborted')
@@ -20,7 +21,7 @@ test('propagation by abort', async () => {
 })
 
 test('propagation by reject', async () => {
-    const f = jest.fn()
+    const f = fn()
     const p = all([task(f), task(f), Promise.reject(new Error('fail'))])
     await expect(p).rejects.toThrow('fail')
     expect(f.mock.calls.length).toBe(2)
