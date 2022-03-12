@@ -4,12 +4,12 @@ export function delay(ms: number) {
     return new Promise(r => setTimeout(r, ms))
 }
 
-export function task(f: Function) {
+export function aicoOnlyAbort(cb: () => void) {
     return aico(function* (signal) {
         try {
-            yield delay(10)
+            yield new Promise(() => {})
         } finally {
-            if (signal.aborted) f()
+            if (signal.aborted) cb()
         }
     })
 }
