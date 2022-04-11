@@ -1,7 +1,12 @@
 import AbortError from './AbortError'
-import { AicoOptions, GenFunction, OnFulfilled, OnRejected } from './types'
 
-export default class AbortInCoroutines<T> {
+export type GenFunction<T> = (signal: AbortSignal) => Generator<any, T>
+export type AicoOptions = { signal?: AbortSignal }
+
+type OnFulfilled<T, R> = (value: T) => R | PromiseLike<R>
+type OnRejected<T = never> = (reason: any) => T | PromiseLike<T>
+
+export default class AbortInCoroutines<T> implements PromiseLike<T> {
     private _ctrl: AbortController | null = null
     private _promise: Promise<T>
     private _isAborted = false

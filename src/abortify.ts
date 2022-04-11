@@ -1,11 +1,13 @@
 import AbortInCoroutines from './AbortInCoroutines'
 
-export default function <T = any, R = any>(fn: (values: Array<T | PromiseLike<T>>) => PromiseLike<R>) {
-    return (values: Array<T | PromiseLike<T>>) =>
+export default function abortify<T = any, R = any>(
+    combinator: (values: Iterable<T | PromiseLike<T>>) => PromiseLike<R>
+) {
+    return (values: Iterable<T | PromiseLike<T>>) =>
         new AbortInCoroutines<R>(function* (signal) {
             let isErr = false
             try {
-                return (yield fn(values).then(
+                return (yield combinator(values).then(
                     v => v,
                     err => {
                         isErr = true
@@ -14,9 +16,11 @@ export default function <T = any, R = any>(fn: (values: Array<T | PromiseLike<T>
                 )) as R
             } finally {
                 if (isErr || signal.aborted) {
-                    values.forEach(v => {
-                        if (v instanceof AbortInCoroutines && !v.isAborted) v.abort()
-                    })
+                    for (const p of values) {
+                        if (p instanceof AbortInCoroutines && p.isAborted) {
+                            p.abort()
+                        }
+                    }
                 }
             }
         })
