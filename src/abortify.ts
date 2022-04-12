@@ -17,7 +17,7 @@ export default function abortify<T = any, R = any>(
             } finally {
                 if (isErr || signal.aborted) {
                     for (const p of values) {
-                        if (p instanceof AbortInCoroutines && p.isAborted) {
+                        if (p instanceof AbortInCoroutines && !p.isAborted) {
                             p.abort()
                         }
                     }
