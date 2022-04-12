@@ -1,4 +1,4 @@
-import { test, expect, fn } from 'vitest'
+import { test, expect, vi } from 'vitest'
 import { race } from '../src'
 import { delay, aicoOnlyAbort } from './_helpers'
 
@@ -13,7 +13,7 @@ test('reject', async () => {
 })
 
 test('propagation by abort', async () => {
-    const f = fn()
+    const f = vi.fn()
     const p = race([aicoOnlyAbort(f), aicoOnlyAbort(f)])
     p.abort()
     await expect(p).rejects.toThrow('Aborted')
@@ -21,7 +21,7 @@ test('propagation by abort', async () => {
 })
 
 test('propagation by reject', async () => {
-    const f = fn()
+    const f = vi.fn()
     const p = race([aicoOnlyAbort(f), aicoOnlyAbort(f), Promise.reject(new Error('fail'))])
     await expect(p).rejects.toThrow('fail')
     expect(f.mock.calls.length).toBe(2)

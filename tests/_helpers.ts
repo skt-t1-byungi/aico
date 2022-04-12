@@ -6,12 +6,12 @@ export function delay(ms: number) {
 
 export function aicoOnlyAbort(cb: () => void) {
     return aico(function* (signal) {
-        let r: any
+        let resolve: any
         try {
-            yield new Promise(_r => (r = _r))
+            yield new Promise(r => (resolve = r))
         } finally {
             if (signal.aborted) cb()
-            r()
+            resolve()
         }
     })
 }
