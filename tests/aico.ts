@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { aico } from '../src'
-import { delay } from './_helpers'
+import { setTimeout } from 'node:timers/promises'
 
 test('promiseLike', async () => {
     await expect(
@@ -70,7 +70,7 @@ test('yield*', async () => {
 
 test('abort, isAborted', async () => {
     const p = aico(function* () {
-        yield delay(0)
+        yield setTimeout(0)
     })
     expect(p.isAborted).toBe(false)
     p.abort()
@@ -82,7 +82,7 @@ test('aborted finally', async () => {
     expect.assertions(2)
     const p = aico(function* (signal) {
         try {
-            yield delay(0)
+            yield setTimeout(0)
             expect.fail()
         } catch {
             expect.fail()
@@ -98,7 +98,7 @@ test('yield after abort', async () => {
     expect.assertions(2)
     const p = aico(function* () {
         try {
-            yield delay(0)
+            yield setTimeout(0)
         } finally {
             expect(yield 1).toBe(1) // 1
         }
@@ -110,7 +110,7 @@ test('yield after abort', async () => {
 test('return after abort', async () => {
     const p = aico(function* () {
         try {
-            yield delay(0)
+            yield setTimeout(0)
             expect.fail()
         } finally {
             // eslint-disable-next-line no-unsafe-finally
@@ -123,7 +123,7 @@ test('return after abort', async () => {
 test('yield and return after abort', async () => {
     const p = aico(function* () {
         try {
-            yield delay(0)
+            yield setTimeout(0)
             expect.fail()
         } finally {
             expect(yield 1).toBe(1)
@@ -140,7 +140,7 @@ test('abort with `opts.signal`', async () => {
     const ctrl = new AbortController()
     const p = aico(
         function* () {
-            yield delay(0)
+            yield setTimeout(0)
         },
         { signal: ctrl.signal }
     )
@@ -167,7 +167,7 @@ test('abort propagation', async () => {
     const child = aico(function* (signal) {
         try {
             expect(signal.aborted).toBe(false) // 1
-            yield delay(0)
+            yield setTimeout(0)
             expect.fail()
         } finally {
             expect(signal.aborted).toBe(true) // 2
