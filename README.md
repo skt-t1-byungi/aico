@@ -264,44 +264,28 @@ This is an abortable [`Promise.any()`](https://developer.mozilla.org/docs/Web/Ja
 
 This is an abortable [`Promise.allSettled()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled).
 
-#### abortify(fn)
-
-This function wraps to make it abortable for a custom function that handles multiple promises.
-
-```js
-import { abortify } from 'aico'
-
-const any = abortify(Promise.any.bind(Promise)) // <= `Promise.any` is experimental and not fully supported.
-
-const promise = any([
-    /* ... */
-])
-
-promise.abort()
-```
-
-## Tips
-
-### Type inference of yielded promise
-
-```js
-const promise = aico(function* () {
-    const result = yield asyncTask() // <= result type is `any` or `unknown`.
-
-    /* ... */
-})
-```
+### cast(promise)
 
 In TypeScript, type inference of yielded promise is difficult. So do type assertions explicitly.
 
 ```ts
-import { aico } from 'aico'
+import { aico, cast } from 'aico'
 
 const promise = aico(function* () {
     const data = (yield asyncTask()) as { value: string }
 
     // or
     const data = (yield asyncTask()) as Awaited<ReturnType<typeof asyncTask>>
+})
+```
+
+Or a `cast` function and `yield*` combination, type inference is possible without type assertion.
+
+```ts
+import { aico, cast } from 'aico'
+
+const promise = aico(function* () {
+    const data = yield* cast(asyncTask())
 })
 ```
 
