@@ -1,7 +1,7 @@
 import AbortError from './AbortError'
 
-export type GenFunction<T> = (signal: AbortSignal) => Generator<any, T>
-export type AicoOptions = { signal?: AbortSignal }
+export type GeneratorExecutor<T> = (signal: AbortSignal) => Generator<any, T>
+export type AbortInCoroutinesOptions = { signal?: AbortSignal; unhandledRejection?: boolean }
 
 type OnFulfilled<T, R> = (value: T) => R | PromiseLike<R>
 type OnRejected<T = never> = (reason: any) => T | PromiseLike<T>
@@ -11,8 +11,11 @@ export default class AbortInCoroutines<T> implements PromiseLike<T> {
     private _promise: Promise<T>
     private _isAborted = false
 
-    constructor(gen: GenFunction<T>, { signal: optSig }: AicoOptions = {}) {
-        this._promise = new Promise((_resolve, _reject) => {
+    constructor(
+        gen: GeneratorExecutor<T>,
+        { signal: optSig, unhandledRejection = false }: AbortInCoroutinesOptions = {}
+    ) {
+        const p = (this._promise = new Promise((_resolve, _reject) => {
             let cleaners: (() => void)[] | null = []
 
             function onAbort(sig: AbortSignal, cb: () => void) {
@@ -100,7 +103,11 @@ export default class AbortInCoroutines<T> implements PromiseLike<T> {
             }
 
             nextIter()
-        })
+        }))
+
+        if (!unhandledRejection) {
+            p.catch(noop)
+        }
     }
 
     then<TR1 = T, TR2 = never>(onfulfilled?: OnFulfilled<T, TR1> | null, onrejected?: OnRejected<TR2> | null) {
@@ -127,3 +134,5 @@ export default class AbortInCoroutines<T> implements PromiseLike<T> {
 function isThenable<T>(p: any): p is PromiseLike<T> {
     return p && typeof p.then === 'function'
 }
+
+function noop() {}

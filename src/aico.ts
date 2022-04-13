@@ -1,5 +1,5 @@
-import AbortInCoroutines, { AicoOptions, GenFunction } from './AbortInCoroutines'
+import AbortInCoroutines, { AbortInCoroutinesOptions, GeneratorExecutor } from './AbortInCoroutines'
 
-export default function aico<T>(gen: GenFunction<T>, opts?: AicoOptions) {
+export default function aico<T>(gen: GeneratorExecutor<T>, opts?: AbortInCoroutinesOptions) {
     return new AbortInCoroutines(gen, opts)
 }
