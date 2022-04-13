@@ -144,10 +144,28 @@ const promise = new AbortInCoroutines(
             }
         }
     },
-    { signal: controller.signal }
-) // 👈 Here, the external controller's signal is used.
+    {
+        signal: controller.signal, // 👈 Here, the external controller's signal is used.
+    }
+)
 
 controller.abort() // => aborted!
+```
+
+#### unhandledRejection
+
+If there is no catch handler registered when this is `true`, an `unhandledRejection` occurs. Default is `false`.
+
+```js
+new AbortInCoroutines(
+    function* () {
+        /* ... */
+    },
+    {
+        unhandledRejection: true,
+    }
+).abort()
+// => `unhandledRejection` warning is printed.
 ```
 
 ### aico(generator, options?)
