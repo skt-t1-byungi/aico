@@ -64,7 +64,7 @@ Create an abortable promise using a generator. In a generator, `yield` is the sa
 import { AbortInCoroutines } from 'aico'
 
 const promise = new AbortInCoroutines(function* () {
-    const result = yield Promise.resolve('hello') // <= result is `"hello"`.
+    const result = yield Promise.resolve('hello') // <= result is "hello".
 
     return result
 })
