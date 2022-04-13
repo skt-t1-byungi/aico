@@ -5,7 +5,7 @@
 [![npm](https://flat.badgen.net/npm/v/aico)](https://www.npmjs.com/package/aico)
 [![npm](https://flat.badgen.net/npm/license/aico)](https://github.com/skt-t1-byungi/aico/blob/master/LICENSE)
 
-`aico` was inspired by redux-saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html). I wanted to use it in promises and found several alternatives. But they are a little bit verbose or lacking. `aico` writes less and does more. And it supports [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and typescript (Although not enough).
+`aico` was inspired by redux-saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html). I wanted to use it in promises and found several alternatives. But they are a little bit verbose or lacking. `aico` writes less and does more. And it supports [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and typescript.
 
 ![aico](./aico.jpg)
 
@@ -14,7 +14,7 @@
 ## Example
 
 ```js
-import aico from 'aico'
+import { aico } from 'aico'
 
 const promise = aico(function* (signal) {
     try {
@@ -64,13 +64,13 @@ Create an abortable promise using a generator. In a generator, `yield` is the sa
 import { AbortInCoroutines } from 'aico'
 
 const promise = new AbortInCoroutines(function* () {
-    const result = yield asyncTask() // <= result is `{ status: 'complete' }`.
+    const result = yield Promise.resolve('hello') // <= result is `"hello"`.
 
-    return result.status
+    return result
 })
 
 promise.then(val => {
-    console.log(val) // => complete
+    console.log(val) // => "hello"
 })
 ```
 
@@ -127,21 +127,6 @@ promise.abort() // => subTask is aborted!
 
 #### options
 
-##### AbortController
-
-This is an option for AbortController [ponyfill](https://github.com/sindresorhus/ponyfill) instead of polyfill. (`aico` uses [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) internally)
-
-```js
-import AbortController from 'abort-controller'
-
-new AbortInCoroutines(
-    function* (signal) {
-        /* ... */
-    },
-    { AbortController }
-)
-```
-
 ##### signal
 
 This is an option to abort a promise with the signal of the external controller.
@@ -170,9 +155,6 @@ controller.abort() // => aborted!
 This function can be used instead of the verbose `new AbortInCoroutines()`.
 
 ```js
-import aico from 'aico'
-
-//or
 import { aico } from 'aico'
 ```
 
@@ -278,16 +260,16 @@ const promise = aico(function* () {
 })
 ```
 
-In TypeScript, type inference of yielded promise is difficult. So do type assertions explicitly, or using `AsyncResult` helper.
+In TypeScript, type inference of yielded promise is difficult. So do type assertions explicitly.
 
 ```ts
-import { aico, AsyncResult } from 'aico'
+import { aico } from 'aico'
 
 const promise = aico(function* () {
     const data = (yield asyncTask()) as { value: string }
 
     // or
-    const data = (yield asyncTask()) as AsyncResult<typeof asyncTask>
+    const data = (yield asyncTask()) as Awaited<ReturnType<typeof asyncTask>>
 })
 ```
 
