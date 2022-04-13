@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest'
-import { aico } from '../src'
+import { aico, cast } from '../src'
 import { setTimeout } from 'node:timers/promises'
 
 test('promiseLike', async () => {
@@ -26,7 +26,7 @@ test('yield primitive', async () => {
 test('yield resolved promise', async () => {
     await expect(
         aico(function* () {
-            return ((yield Promise.resolve(1)) as any) + 1
+            return (yield* cast(Promise.resolve(1))) + 1
         })
     ).resolves.toBe(2)
 })
@@ -127,7 +127,7 @@ test('yield and return after abort', async () => {
             expect.fail()
         } finally {
             expect(yield 1).toBe(1)
-            expect(yield Promise.resolve(2)).toBe(2)
+            expect(yield* cast(Promise.resolve(2))).toBe(2)
             // eslint-disable-next-line no-unsafe-finally
             return 3
         }

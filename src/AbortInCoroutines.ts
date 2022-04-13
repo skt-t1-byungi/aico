@@ -89,16 +89,15 @@ export default class AbortInCoroutines<T> implements PromiseLike<T> {
 
             function handle(res: IteratorResult<any, T>) {
                 if (res.done) {
-                    done(res.value)
+                    return done(res.value)
+                }
+                if (isThenable(res.value)) {
+                    ;(pRunning = res.value).then(
+                        val => pRunning === res.value && nextIter(val),
+                        err => pRunning === res.value && throwIter(err)
+                    )
                 } else {
-                    if (isThenable(res.value)) {
-                        ;(pRunning = res.value).then(
-                            val => pRunning === res.value && nextIter(val),
-                            err => pRunning === res.value && throwIter(err)
-                        )
-                    } else {
-                        nextIter(res.value)
-                    }
+                    nextIter(res.value)
                 }
             }
 
