@@ -58,12 +58,12 @@ npm install aico
 
 ### new AbortInCoroutines(generator, options?)
 
-Create an abortable promise using a generator. In a generator, `yield` is the same as async function's `await`. Likewise, wait for a promise result.
+Create an abortable promise using a generator. In a generator, `yield` is the same as async function's `await`.
 
 ```js
 import { AbortInCoroutines } from 'aico'
 
-const promise = new AbortInCoroutines(function* () {
+const promise = new AbortInCoroutines(function* (signal) {
     const result = yield Promise.resolve('hello') // <= result is "hello".
 
     return result
@@ -74,7 +74,7 @@ promise.then(val => {
 })
 ```
 
-the parameter `signal` is [AbortSignal](https://developer.mozilla.org/docs/Web/API/AbortSignal) that can cancel DOM requests such as fetch.
+`signal` parameter is [AbortSignal](https://developer.mozilla.org/docs/Web/API/AbortSignal) that can cancel DOM requests such as fetch.
 
 ```js
 const promise = new AbortInCoroutines(function* (signal) {
@@ -86,7 +86,7 @@ const promise = new AbortInCoroutines(function* (signal) {
 promise.abort() // <= Abort `/api/request` request.
 ```
 
-`signal` has an `aborted` that indicates whether the promise was aborted or not.
+`signal` has an `aborted` property that indicates whether the promise was aborted or not.
 
 ```js
 const promise = new AbortInCoroutines(function* (signal) {
@@ -104,7 +104,7 @@ const promise = new AbortInCoroutines(function* (signal) {
 promise.abort() // => aborted!
 ```
 
-If the yielded promise is created by `aico`, the abortion is propagated.
+If the yielded promise was created with `AbortInCoroutines`, the cancellation is propagated.
 
 ```js
 const subTask = () =>
@@ -152,7 +152,7 @@ const promise = new AbortInCoroutines(
 controller.abort() // => aborted!
 ```
 
-#### unhandledRejection
+##### unhandledRejection
 
 If there is no catch handler registered when this is `true`, an `unhandledRejection` occurs. Default is `false`.
 
@@ -168,15 +168,7 @@ new AbortInCoroutines(
 // => `unhandledRejection` warning is printed.
 ```
 
-### aico(generator, options?)
-
-This function can be used instead of the verbose `new AbortInCoroutines()`.
-
-```js
-import { aico } from 'aico'
-```
-
-### promise.isAborted
+#### promise.isAborted
 
 Returns whether the promise is aborted or not.
 
@@ -190,13 +182,27 @@ promise.abort()
 console.log(promise.isAborted) // => true
 ```
 
-### promise.abort()
+#### promise.abort()
 
 Abort the promise.
 
-### all(values)
+### aico(generator, options?)
 
-This is an abortable [`Promise.all()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
+This function can be used instead of the verbose `new AbortInCoroutines()`.
+
+```js
+import { aico } from 'aico'
+
+const promise = aico(function* (signal) {
+    /* ... */
+})
+```
+
+### Combinators
+
+#### all(values)
+
+This is an abortable [`Promise.all()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/all).
 
 ```js
 import { aico, all } from 'aico'
@@ -230,7 +236,7 @@ const promise = all([fetchData('/api/1'), fetchData('/api/2'), fetchData('/api/3
 // => aborted : /api/3
 ```
 
-### race(values)
+#### race(values)
 
 This is an abortable [`Promise.race()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
 
@@ -250,7 +256,15 @@ const promise = race([
 
 Likewise, if one is rejected, the other promise created by aico is automatically aborted.
 
-### abortify(fn)
+#### any(values)
+
+This is an abortable [`Promise.any()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/any).
+
+#### allSettled(values)
+
+This is an abortable [`Promise.allSettled()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled).
+
+#### abortify(fn)
 
 This function wraps to make it abortable for a custom function that handles multiple promises.
 
