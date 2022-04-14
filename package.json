@@ -3,6 +3,9 @@
     "description": "abort in coroutines (promise)",
     "repository": "https://github.com/skt-t1-byungi/aico.git",
     "author": "skt-t1-byungi <tiniwz@gmail.com>",
+    "engines": {
+        "node": ">=15.0.0"
+    },
     "keywords": [
         "coroutine",
         "generator",
