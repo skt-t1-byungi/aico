@@ -1,6 +1,6 @@
 # A.I.C.O 🦄
 
-> **A**bort **I**n **CO**routines (promises)
+> **A**bort **I**n **CO**routines (promise)
 
 [![npm](https://flat.badgen.net/npm/v/aico)](https://www.npmjs.com/package/aico)
 [![npm](https://flat.badgen.net/npm/license/aico)](https://github.com/skt-t1-byungi/aico/blob/master/LICENSE)

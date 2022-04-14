@@ -1,6 +1,6 @@
 {
     "name": "aico",
-    "description": "abort in coroutines (promises)",
+    "description": "abort in coroutines (promise)",
     "repository": "https://github.com/skt-t1-byungi/aico.git",
     "author": "skt-t1-byungi <tiniwz@gmail.com>",
     "keywords": [
@@ -22,6 +22,10 @@
     "files": [
         "dist"
     ],
+    "exports": {
+        "require": "./dist/index.js",
+        "import": "./dist/index.mjs"
+    },
     "scripts": {
         "build": "tsup src/index.ts --format esm,cjs --dts --clean",
         "test": "vitest run",
