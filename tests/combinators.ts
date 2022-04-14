@@ -28,11 +28,11 @@ describe('all', () => {
 
 describe('race', () => {
     it('resolve', async () => {
-        const p = race([setTimeout(2).then(() => 1), setTimeout(1).then(() => '2')])
+        const p = race([setTimeout(10).then(() => 1), setTimeout(1).then(() => '2')])
         await expect(p).resolves.toBe('2')
     })
     it('reject', async () => {
-        const p = race([setTimeout(2).then(() => 1), setTimeout(1).then(() => '2'), Promise.reject(new Error('fail'))])
+        const p = race([setTimeout(10).then(() => 1), setTimeout(1).then(() => '2'), Promise.reject(new Error('fail'))])
         await expect(p).rejects.toThrow('fail')
     })
     it('propagation by abort', async () => {
@@ -52,11 +52,11 @@ describe('race', () => {
 
 describe('any', () => {
     it('resolve', async () => {
-        const p = any([setTimeout(2).then(() => 1), setTimeout(1).then(() => '2')])
+        const p = any([setTimeout(10).then(() => 1), setTimeout(1).then(() => '2')])
         await expect(p).resolves.toBe('2')
     })
     it('reject', async () => {
-        const p = any([setTimeout(2).then(() => 1), setTimeout(1).then(() => '2'), Promise.reject(new Error('fail'))])
+        const p = any([setTimeout(10).then(() => 1), setTimeout(1).then(() => '2'), Promise.reject(new Error('fail'))])
         await expect(p).resolves.toBe('2')
     })
     it('propagation by abort', async () => {
