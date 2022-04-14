@@ -1,12 +1,9 @@
 {
     "compilerOptions": {
-        "target": "ES2022",
+        "target": "ESNext",
         "module": "ESNext",
         "lib": ["DOM", "ESNext"],
-        "declaration": true,
-        "outDir": "./dist",
-        "strict": true,
-        "skipLibCheck": true
+        "strict": true
     },
     "include": ["./src/"]
 }
