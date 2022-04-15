@@ -1,6 +1,7 @@
 {
     "name": "aico",
     "description": "abort in coroutines (promise)",
+    "version": "1.0.1",
     "repository": {
         "type": "git",
         "url": "https://github.com/skt-t1-byungi/aico.git"
@@ -23,7 +24,6 @@
         "cancellation"
     ],
     "license": "MIT",
-    "version": "1.0.0",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "files": [
