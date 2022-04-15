@@ -31,7 +31,7 @@ const promise = aico(function* (signal) {
 })
 
 promise.catch(err => {
-    console.log(`4. message: ${err.message}`)
+    console.log(`4. message: ${err.name}`)
     console.log(`5. isAborted: ${err.isAborted}`)
 })
 
@@ -44,7 +44,7 @@ setTimeout(() => {
 > output
 1. This is printed.
 3. aborted!
-4. message: Aborted
+4. message: AbortError
 5. isAborted: true
 ```
 
@@ -101,7 +101,7 @@ const promise = new AbortInCoroutines(function* (signal) {
     }
 })
 
-promise.abort() // => aborted!
+promise.abort() // => "aborted!"
 ```
 
 If the yielded promise was created with `AbortInCoroutines`, the cancellation is propagated.
@@ -122,7 +122,7 @@ const promise = new AbortInCoroutines(function* () {
     yield subTask()
 })
 
-promise.abort() // => subTask is aborted!
+promise.abort() // => "subTask is aborted!"
 ```
 
 #### options
