@@ -5,11 +5,11 @@
 [![npm](https://flat.badgen.net/npm/v/aico)](https://www.npmjs.com/package/aico)
 [![npm](https://flat.badgen.net/npm/license/aico)](https://github.com/skt-t1-byungi/aico/blob/master/LICENSE)
 
-`aico` was inspired by redux-saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html). I wanted to use it in promises and found several alternatives. But they are a little bit verbose or lacking. `aico` writes less and does more. And it supports [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and typescript.
+Inspired by Redux-Saga's [Task cancellation](https://redux-saga.js.org/docs/advanced/TaskCancellation.html), aico is designed to make promise cancellation simpler and more efficient. With a minimalist API, it integrates seamlessly with [AbortController](https://developer.mozilla.org/docs/Web/API/AbortController) and TypeScript.
 
 ![aico](./aico.jpg)
 
-(I enjoyed watching [A.I.C.O](https://www.netflix.com/title/80161848) on Netflix)
+(Title inspired by the Netflix series [A.I.C.O](https://www.netflix.com/title/80161848) on Netflix))
 
 ## Example
 
@@ -58,19 +58,14 @@ npm install aico
 
 ### new AbortInCoroutines(generator, options?)
 
-Create an abortable promise using a generator. In a generator, `yield` is the same as async function's `await`.
+Creates an abortable promise. Within the generator function, the `yield` statement behaves like `await` in an async function.
 
 ```js
 import { AbortInCoroutines } from 'aico'
 
 const promise = new AbortInCoroutines(function* (signal) {
-    const result = yield Promise.resolve('hello') // <= result is "hello".
-
+    const result = yield Promise.resolve('hello')
     return result
-})
-
-promise.then(val => {
-    console.log(val) // => "hello"
 })
 ```
 
@@ -79,8 +74,7 @@ promise.then(val => {
 ```js
 const promise = new AbortInCoroutines(function* (signal) {
     const response = yield fetch('/api/request', { signal })
-
-    console.log('This is not printed.')
+    // ...
 })
 
 promise.abort() // <= Abort `/api/request` request.
@@ -95,8 +89,6 @@ const promise = new AbortInCoroutines(function* (signal) {
     } finally {
         if (signal.aborted) {
             console.log('aborted!')
-        } else {
-            console.log('not aborted.')
         }
     }
 })
@@ -129,32 +121,26 @@ promise.abort() // => "subTask is aborted!"
 
 ##### signal
 
-This is an option to abort a promise with the signal of the external controller.
+Allows for aborting the promise using an external AbortController signal.
 
 ```js
 const controller = new AbortController()
 
 const promise = new AbortInCoroutines(
     function* (signal) {
-        try {
-            /* ... */
-        } finally {
-            if (signal.aborted) {
-                console.log('aborted!')
-            }
-        }
+        /* ... */
     },
     {
-        signal: controller.signal, // 👈 Here, the external controller's signal is used.
-    }
+        signal: controller.signal,
+    },
 )
 
-controller.abort() // => aborted!
+controller.abort()
 ```
 
 ##### unhandledRejection
 
-If there is no catch handler registered when this is `true`, an `unhandledRejection` occurs. Default is `false`.
+If set to `true`, an unhandledRejection occurs. Default is `false`.
 
 ```js
 new AbortInCoroutines(
@@ -163,18 +149,15 @@ new AbortInCoroutines(
     },
     {
         unhandledRejection: true,
-    }
+    },
 ).abort()
-// => `unhandledRejection` warning is printed.
 ```
 
 #### promise.isAborted
 
-Returns whether the promise is aborted or not.
+Checks if the promise has been aborted.
 
 ```js
-const promise = new AbortInCoroutines(/* ... */)
-
 console.log(promise.isAborted) // => false
 
 promise.abort()
@@ -184,11 +167,11 @@ console.log(promise.isAborted) // => true
 
 #### promise.abort()
 
-Abort the promise.
+Abort the promise manually.
 
 ### aico(generator, options?)
 
-This function can be used instead of the verbose `new AbortInCoroutines()`.
+A shorthand function as an alternative to `new AbortInCoroutines()`.
 
 ```js
 import { aico } from 'aico'
@@ -202,90 +185,42 @@ const promise = aico(function* (signal) {
 
 #### all(values)
 
-This is an abortable [`Promise.all()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/all).
-
-```js
-import { aico, all } from 'aico'
-
-const fetchData = url =>
-    aico(function* (signal) {
-        try {
-            /* ... */
-        } finally {
-            if (signal.aborted) {
-                console.log(`aborted : ${url}`)
-            }
-        }
-    })
-
-const promise = all([fetchData('/api/1'), fetchData('/api/2'), fetchData('/api/3')])
-
-promise.abort()
-// => aborted : /api/1
-// => aborted : /api/2
-// => aborted : /api/3
-```
-
-If one is rejected, the other promise created by `aico` is automatically aborted.
-
-```js
-const promise = all([fetchData('/api/1'), fetchData('/api/2'), fetchData('/api/3'), Promise.reject('fail')])
-// (This is printed immediately)
-// => aborted : /api/1
-// => aborted : /api/2
-// => aborted : /api/3
-```
+An abortable version of [`Promise.all()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/all). If one promise rejects, all other promises are automatically aborted.
 
 #### race(values)
 
-This is an abortable [`Promise.race()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
-
-```js
-import { race } from 'aico'
-
-const timeout = ms => new Promise((_, reject) => setTimeout(reject, ms))
-
-const promise = race([
-    fetchData('/delay/600'), // <= This api takes 600ms.
-    timeout(500),
-])
-
-// (After 500ms)
-// => aborted : /delay/600
-```
-
-Likewise, if one is rejected, the other promise created by aico is automatically aborted.
+An abortable version of [`Promise.race()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/race). If one promise rejects, all other promises are automatically aborted.
 
 #### any(values)
 
-This is an abortable [`Promise.any()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/any).
+An abortable version of [`Promise.any()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/any).
 
 #### allSettled(values)
 
-This is an abortable [`Promise.allSettled()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled).
+An abortable version of [`Promise.allSettled()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled).
 
 ### cast(promise)
 
-In TypeScript, type inference of yielded promise is difficult. So do type assertions explicitly.
+When working with TypeScript, you may find type inference challenging for yielded promises.
 
 ```ts
 import { aico, cast } from 'aico'
 
 const promise = aico(function* () {
-    const data = (yield asyncTask()) as { value: string }
+    const data = (yield fetchData()) as { value: string }
 
     // or
-    const data = (yield asyncTask()) as Awaited<ReturnType<typeof asyncTask>>
+    const data = (yield fetchData()) as Awaited<ReturnType<typeof fetchData>>
 })
 ```
 
-Or a `cast` function and `yield*` combination, type inference is possible without type assertion.
+Use `cast` for better type inference.
 
 ```ts
 import { aico, cast } from 'aico'
 
 const promise = aico(function* () {
-    const data = yield* cast(asyncTask())
+    const data = yield* cast(fetchData())
 })
 ```
 
