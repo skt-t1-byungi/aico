@@ -75,7 +75,7 @@ function aicoForAbort(onAbort: () => void) {
             yield new Promise<void>(r => (resolve = r))
         } finally {
             if (signal.aborted) onAbort()
-            resolve()
+            resolve!()
         }
     })
 }

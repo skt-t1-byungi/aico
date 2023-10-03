@@ -6,12 +6,12 @@ test('promiseLike', async () => {
     await expect(
         aico(function* () {
             return 1
-        })
+        }),
     ).resolves.toBe(1)
     await expect(
         aico(function* () {
             throw new Error('err')
-        })
+        }),
     ).rejects.toThrow()
 })
 
@@ -19,7 +19,7 @@ test('yield primitive', async () => {
     await expect(
         aico(function* () {
             return ((yield 1) as any) + 1
-        })
+        }),
     ).resolves.toBe(2)
 })
 
@@ -27,7 +27,7 @@ test('yield resolved promise', async () => {
     await expect(
         aico(function* () {
             return (yield* cast(Promise.resolve(1))) + 1
-        })
+        }),
     ).resolves.toBe(2)
 })
 
@@ -36,7 +36,7 @@ test('yield rejected promise', async () => {
     await expect(
         aico(function* () {
             yield Promise.reject(inputErr)
-        })
+        }),
     ).rejects.toThrow(inputErr)
 })
 
@@ -50,7 +50,7 @@ test('catch rejected promise', async () => {
                 return err
             }
             expect.fail()
-        })
+        }),
     ).resolves.toBe(inputErr)
 })
 
@@ -64,7 +64,7 @@ test('yield*', async () => {
     await expect(
         aico(function* () {
             return yield* sub()
-        })
+        }),
     ).resolves.toBe(3) // 3
 })
 
@@ -142,7 +142,7 @@ test('abort with `opts.signal`', async () => {
         function* () {
             yield setTimeout(0)
         },
-        { signal: ctrl.signal }
+        { signal: ctrl.signal },
     )
     expect(p.isAborted).toBe(false)
     ctrl.abort()
@@ -157,7 +157,7 @@ test('abort with aborted `opts.signal`', async () => {
         function* () {
             expect.fail()
         },
-        { signal: ctrl.signal }
+        { signal: ctrl.signal },
     )
     await expect(p).rejects.toThrow('`options.signal` is already abort')
 })

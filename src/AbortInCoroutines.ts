@@ -13,7 +13,7 @@ export default class AbortInCoroutines<T> implements PromiseLike<T> {
 
     constructor(
         gen: GeneratorExecutor<T>,
-        { signal: optSig, unhandledRejection = false }: AbortInCoroutinesOptions = {}
+        { signal: optSig, unhandledRejection = false }: AbortInCoroutinesOptions = {},
     ) {
         const p = (this._promise = new Promise((_resolve, _reject) => {
             let cleaners: (() => void)[] | null = []
@@ -94,7 +94,7 @@ export default class AbortInCoroutines<T> implements PromiseLike<T> {
                 if (isThenable(res.value)) {
                     ;(pRunning = res.value).then(
                         val => pRunning === res.value && nextIter(val),
-                        err => pRunning === res.value && throwIter(err)
+                        err => pRunning === res.value && throwIter(err),
                     )
                 } else {
                     nextIter(res.value)

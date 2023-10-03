@@ -1,7 +1,7 @@
 import AbortInCoroutines from './AbortInCoroutines'
 
 export default function abortify<T = any, R = any>(
-    combinator: (values: Iterable<T | PromiseLike<T>>) => PromiseLike<R>
+    combinator: (values: Iterable<T | PromiseLike<T>>) => PromiseLike<R>,
 ) {
     return (values: Iterable<T | PromiseLike<T>>) =>
         new AbortInCoroutines<R>(function* (signal) {
@@ -12,7 +12,7 @@ export default function abortify<T = any, R = any>(
                     err => {
                         isErr = true
                         throw err
-                    }
+                    },
                 )) as R
             } finally {
                 if (isErr || signal.aborted) {
